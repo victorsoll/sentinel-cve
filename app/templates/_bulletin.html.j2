@@ -1,0 +1,50 @@
+<details class="bulletin" data-status="{{ b.status }}" data-kind="{{ b.kind }}"{% if b.ado_items %} data-ado="1"{% endif %}>
+  <summary>
+    <span class="b-ref">{{ b.ref | replace("CERTFR-", "") }}<span class="date">{{ b.date[:10] if b.date else "" }}</span></span>
+    <span class="b-title">{{ b.title }}
+      {% if b.alert_status %}<span class="tag {{ 'tag-live' if 'cours' in b.alert_status else '' }}">{{ b.alert_status }}</span>{% endif %}
+      {% if b.pending_ai %}<span class="tag">en attente IA</span>{% endif %}
+      {% for w in b.ado_items %}{% if loop.first %}<span class="tag tag-ado">ADO #{{ w.id }}{% if b.ado_items|length > 1 %} +{{ b.ado_items|length - 1 }}{% endif %}</span>{% endif %}{% endfor %}
+    </span>
+    <span class="pill {{ b.status }}">{{ b.status_label }}</span>
+    <span class="b-count">{{ b.count_label }}</span>
+    <span class="chev" aria-hidden="true">▶</span>
+  </summary>
+  <div class="b-body">
+    {% if b.installed_summary or b.target_version or b.type_label %}
+    <div class="b-meta">
+      {% if b.installed_summary %}<div><b>Installé</b><span class="mono">{{ b.installed_summary }}</span></div>{% endif %}
+      {% if b.target_version %}<div><b>Version cible</b><span class="mono">{{ b.target_version }}</span></div>{% endif %}
+      {% if b.type_label %}<div><b>Catégorie</b><span>{{ b.type_label }}</span></div>{% endif %}
+    </div>
+    {% endif %}
+    {% if b.summary %}<p class="b-summary">{{ b.summary | truncate(400) }}</p>{% endif %}
+    <div class="b-actions">
+      {% if b.link %}<a class="b-cta" href="{{ b.link }}" target="_blank" rel="noopener">CERT-FR ↗</a>{% endif %}
+      {% if ado_enabled %}
+      <button type="button" class="b-cta b-ado" data-ado-ref="{{ b.ref }}" data-ado-title="{{ b.title }}">＋ Créer un {{ ado_type }} ADO</button>
+      {% endif %}
+      {% for w in b.ado_items %}
+      <a class="b-link mono" href="{{ w.url }}" target="_blank" rel="noopener">{{ w.type }} #{{ w.id }}{% if w.assigned_to %} · {{ w.assigned_to }}{% endif %} ↗</a>
+      {% endfor %}
+    </div>
+    {% if b.hosts %}
+    <div class="host-table-wrap">
+      <table class="hosts">
+        <thead><tr><th>Équipement</th><th>Site</th><th>Version installée</th><th>Cible</th></tr></thead>
+        <tbody>
+          {% for h in b.hosts %}
+          <tr>
+            <td class="mono">{{ h.name }}</td>
+            <td>{{ h.site or "—" }}</td>
+            <td class="mono">{{ h.installed or "non renseigné" }}</td>
+            <td class="mono">{{ h.target or b.target_version or "—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {% if b.limit_note %}<div class="limit-note">{{ b.limit_note }}</div>{% endif %}
+  </div>
+</details>
